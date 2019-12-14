@@ -1,12 +1,24 @@
-local version = "0.3b"
+local version = "0.4b"
 
-local function LoadFiles()
-    if SERVER then
-        AddCSLuaFile("gsdrawlib/gsdraw_meta_cl.lua")
-        AddCSLuaFile("gsdrawlib/gsdraw_functions_cl.lua")
-    else
-        include("gsdrawlib/gsdraw_meta_cl.lua")
-        include("gsdrawlib/gsdraw_functions_cl.lua")
+local function LoadGSDraw()
+    local files, dirs = file.Find("gsdrawlib/*", "LUA")
+    for _, v in pairs(files) do  
+        if string.find(v, "_sh") then
+            if SERVER then
+                include("gsdrawlib/"..v)
+                AddCSLuaFile("gsdrawlib/"..v)
+            else
+                include("gsdrawlib/"..v)
+            end
+        elseif string.find(v, "_sv") then
+            include("gsdrawlib/"..v)
+        elseif string.find(v, "_cl") then
+            if SERVER then
+                AddCSLuaFile("gsdrawlib/"..v)
+            else
+                include("gsdrawlib/"..v)
+            end
+        end
     end
 end
 
@@ -21,6 +33,6 @@ local function PrintInfo()
 end
 
 hook.Add("Initialize", "gsdraw_init", function()
-    LoadFiles()
+    LoadGSDraw()
     PrintInfo()
 end)

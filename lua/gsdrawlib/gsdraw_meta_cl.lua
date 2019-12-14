@@ -1,32 +1,34 @@
-if SERVER then return end
-
 local panel = FindMetaTable("Panel")
 -- FUNCTION (Easy menu paint)
-function panel:MenuPaint(color, soft)
+function panel:GSMenuPaint(color, soft)
     function self:Paint(w,h)
         draw.RoundedBox(soft, 0,0,w, h, color)
     end 
 end
 -- FUNCTION (Make panel invisible)
-function panel:MakeInvisible()
+function panel:GSMakeInvisible()
     function self:Paint(w,h)
     end
 end
 -- FUNCTION (Close menu when player die)
-function panel:SUDeath()
+function panel:GSSUDeath()
     function self:Think()
-        if !LocalPlayer():Alive() then
-            self:Close()
+        if self:IsValid() and ( !LocalPlayer():Alive() or ( LocalPlayer().BLBO_Stats != nil and !LocalPlayer().BLBO_Stats.cons ) ) then
+            if self:GetClassName() == "DFrame" then
+                self:Close()
+            else
+                self:Remove()
+            end
         end
     end
 end
 -- FUNCTION (Make scrollbar invisible)
-function panel:SetupInvisibleScroll()
+function panel:GSSetupInvisibleScroll()
     local bar_mod_2 = self:GetVBar()
     bar_mod_2:SetSize(0,0)
 end
 -- FUNCTION (Draw text panel)
-function panel:DrawTextPanel(m_color, soft, t_color, text, font, alig)
+function panel:GSDrawTextPanel(m_color, soft, t_color, text, font, alig)
     function self:Paint(w,h)
         draw.RoundedBox(soft, 0,0,w, h, m_color)
     end
@@ -46,15 +48,15 @@ function panel:DrawTextPanel(m_color, soft, t_color, text, font, alig)
     end
 end
 -- FUNCTION (Get text from text panel)
-function panel:GetTextPanelText()
-    for _,v in pairs(self:GetChildren()) do 
+function panel:GSGetTextPanelText()
+    for _,v in pairs(self:GetChildren()) do
         if v.id == 1 then
             return v
         end
     end
 end
 -- FUNCTION (Draw scrollbar)
-function panel:DrawScrollBar(m_color, g_color, m_soft, btn_up, btn_down)
+function panel:GSDrawScrollBar(m_color, g_color, m_soft, btn_up, btn_down)
     local def_btn_u = Color(200, 100, 0, 0)
     local def_btn_d = Color(200, 100, 0, 0)
 
@@ -83,7 +85,7 @@ function panel:DrawScrollBar(m_color, g_color, m_soft, btn_up, btn_down)
     end
 end
 -- FUNCTION (Setup autocontents)
-function panel:AutoContents()
+function panel:GSAutoContents()
     local text_pnl = self:GetTextPanelText()
     if text_pnl != nil then
         self.Think = function()
@@ -92,7 +94,7 @@ function panel:AutoContents()
     end
 end
 -- FUNCTION (Make centered image)
-function panel:MakeNiceImage(path, padding)
+function panel:GSMakeNiceImage(path, padding)
     local niceImage = vgui.Create("DImage", self)
     niceImage:SetImage(path)
     niceImage:Dock(FILL)

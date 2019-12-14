@@ -1,13 +1,13 @@
 if SERVER then return end
 
-gsdraw = {}
+gsdraw = gsdraw or {}
 
-gsdraw.func = {}
+gsdraw.func = gsdraw.func or {}
 
 gsdraw.func.SetupSafeScroll = function(menu)
     local safe_scroll = vgui.Create( "DScrollPanel", menu )
     safe_scroll:Dock( FILL )
-    safe_scroll:DrawScrollBar(Color(36,36,36), Color(46,46,46), 8)
+    safe_scroll:GSDrawScrollBar(Color(36,36,36), Color(46,46,46), 8)
     return safe_scroll
 end
 
@@ -54,7 +54,11 @@ gsdraw.func.SimpleAsk = function(menu,title,def_text, func, close)
     end
 end
 
-gsdraw.func.DrawBlur = function(panel, amount)
+gsdraw.func.DrawBlur = function(panel, amount, color)
+
+    if color == nil then
+        color = Color(0,0,0,0)
+    end
 
     local blur = Material("pp/blurscreen")
 
@@ -63,7 +67,7 @@ gsdraw.func.DrawBlur = function(panel, amount)
     bg:SetPos(0,0)
 
     function bg:Paint( w, h )
-        draw.RoundedBox( 8, 0, 0, w, h, Color( 36, 36, 36, 200 ) )
+        draw.RoundedBox( 8, 0, 0, w, h, color )
         local x, y = bg:LocalToScreen(0, 0)
         local scrW, scrH = ScrW(), ScrH()
         surface.SetDrawColor(255, 255, 255)
@@ -84,4 +88,99 @@ gsdraw.func.DrawBlur = function(panel, amount)
         bg:Remove()
     end
 
+    return bg
+
 end
+
+gsdraw.func.DrawNotify = function(text, color, pos, bgColor)
+    --LocalPlayer().GSNotifies = LocalPlayer().GSNotifies or {}
+    local t_l = string.len(text)
+    if LocalPlayer().GSNotify != nil then
+        LocalPlayer().GSNotify:Remove()
+    end
+    local notify = vgui.Create( "DNotify" )
+    LocalPlayer().GSNotify = notify
+    notify.OnRemove = function()
+        if LocalPlayer().GSNotify == notify then
+            LocalPlayer.GSNotify = nil 
+        end
+    end
+    -- notify.Think = function()
+    --     if !table.HasValue(LocalPlayer().GSNotifies, notify) then
+    --         notify:Remove()
+    --     end
+    -- end
+
+    -- table.insert(LocalPlayer().GSNotifies, notify)
+
+    -- timer.Simple(2, function()
+    --     if notify:IsValid() then
+    --         table.RemoveByValue(LocalPlayer().GSNotifies, notify)
+    --     end
+    -- end)
+
+    local background = vgui.Create("DPanel", notify)
+    background:GSMenuPaint(bgColor, 1)
+
+    local notify_lbl = vgui.Create( "DLabel", background )
+    notify_lbl:SetText( text )
+    notify_lbl:SetFont( "GModNotify" )
+    notify_lbl:SizeToContents()
+    notify_lbl:SetColor(color)
+
+    background:SetSize( notify_lbl:GetWide()+ScrW()*0.05, notify_lbl:GetTall()+ScrH()*0.03 )
+    notify:SetSize( background:GetWide(), background:GetTall() )
+    notify_lbl:Center()
+    
+    notify:Center()
+
+    local def_x, def_y = notify:GetPos()
+    local n_w, n_h = notify:GetSize()
+
+    if pos == 5 then
+        notify:SetPos(def_x, def_y)
+    elseif pos == 2 then
+        notify:SetPos(def_x, def_y-ScrH()*0.4)
+    elseif pos == 8 then
+        notify:SetPos(def_x, def_y+ScrH()*0.4)
+    elseif pos == 1 then
+        notify:SetPos(ScrW()*0.04, def_y-ScrH()*0.4)
+    elseif pos == 3 then
+        notify:SetPos(ScrW() - n_w*ScrW()*0.0006, def_y-ScrH()*0.4)
+    elseif pos == 7 then
+        notify:SetPos(ScrW()*0.04, def_y+ScrH()*0.4)
+    elseif pos == 9 then
+        notify:SetPos(ScrW() - n_w*ScrW()*0.0006, def_y+ScrH()*0.4)
+    elseif pos == 4 then
+        notify:SetPos(ScrW()*0.04, def_y)
+    elseif pos == 6 then
+        notify:SetPos(ScrW() - n_w*ScrW()*0.0006, def_y)
+    end
+
+    -- local upper = { 7, 8, 9 }
+    -- local down = { 1, 2, 3, 4, 5, 6 }
+    -- local notify_x, notify_y = notify:GetPos()
+    -- for k, v in pairs(LocalPlayer().GSNotifies) do
+    --     if table.Count(LocalPlayer().GSNotifies) == 1 then break end
+    --     local last_notify = LocalPlayer().GSNotifies[table.Count(LocalPlayer().GSNotifies)-1]
+    --     local lst_nt_x, lst_nt_y = last_notify:GetPos()
+    --     if table.HasValue(upper, pos) then
+    --         notify:MoveTo(notify_x, lst_nt_y-ScrH()*0.05, 0.5, 0)
+    --     elseif table.HasValue(down, pos) then
+    --         notify:MoveTo(notify_x, lst_nt_y+ScrH()*0.05, 0.5, 0)
+    --     end
+    -- end
+
+    notify:AddItem( background )
+end
+
+-- FUNCTION (Player notify)
+net.Receive("gsdraw_player_notify", function(len, ply) 
+
+    local text = net.ReadString()
+    local colors = net.ReadTable()
+    local pos = net.ReadInt(5)
+
+    gsdraw.func.DrawNotify( text, colors.text_color, pos, colors.background_color )
+
+end)
