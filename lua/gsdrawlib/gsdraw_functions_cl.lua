@@ -94,7 +94,7 @@ end
 
 gsdraw.func.DrawNotify = function(text, color, pos, bgColor)
     --LocalPlayer().GSNotifies = LocalPlayer().GSNotifies or {}
-    local t_l = string.len(text)
+    local t_l = utf8.len(text)
     if LocalPlayer().GSNotify != nil then
         LocalPlayer().GSNotify:Remove()
     end
@@ -131,7 +131,6 @@ gsdraw.func.DrawNotify = function(text, color, pos, bgColor)
     background:SetSize( notify_lbl:GetWide()+ScrW()*0.05, notify_lbl:GetTall()+ScrH()*0.03 )
     notify:SetSize( background:GetWide(), background:GetTall() )
     notify_lbl:Center()
-    
     notify:Center()
 
     local def_x, def_y = notify:GetPos()
@@ -144,17 +143,17 @@ gsdraw.func.DrawNotify = function(text, color, pos, bgColor)
     elseif pos == 8 then
         notify:SetPos(def_x, def_y+ScrH()*0.4)
     elseif pos == 1 then
-        notify:SetPos(ScrW()*0.04, def_y-ScrH()*0.4)
+        notify:SetPos(ScrW()*0.02, def_y-ScrH()*0.4)
     elseif pos == 3 then
-        notify:SetPos(ScrW() - n_w*ScrW()*0.0006, def_y-ScrH()*0.4)
+        notify:SetPos(ScrW() - (n_w+ScrW()*0.02), def_y-ScrH()*0.4)
     elseif pos == 7 then
-        notify:SetPos(ScrW()*0.04, def_y+ScrH()*0.4)
+        notify:SetPos(ScrW()*0.02, def_y+ScrH()*0.4)
     elseif pos == 9 then
-        notify:SetPos(ScrW() - n_w*ScrW()*0.0006, def_y+ScrH()*0.4)
+        notify:SetPos(ScrW() - (n_w+ScrW()*0.02), def_y+ScrH()*0.4)
     elseif pos == 4 then
-        notify:SetPos(ScrW()*0.04, def_y)
+        notify:SetPos(ScrW()*0.02, def_y)
     elseif pos == 6 then
-        notify:SetPos(ScrW() - n_w*ScrW()*0.0006, def_y)
+        notify:SetPos(ScrW() - (n_w+ScrW()*0.02), def_y)
     end
 
     -- local upper = { 7, 8, 9 }
