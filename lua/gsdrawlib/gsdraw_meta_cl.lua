@@ -4,7 +4,11 @@ function panel:GSMenuPaint(color, soft)
 	self.PaintedColor = color
 	self.PaintedSoft = soft
     function self:Paint(w,h)
-        draw.RoundedBox(soft, 0, 0, w, h, color)
+		if self.Invisible then
+			draw.RoundedBox(soft, 0,0,w, h, Color(0,0,0,0))
+		else
+        	draw.RoundedBox(soft, 0, 0, w, h, self.PaintedColor)
+		end
     end
 end
 -- FUNCTION (Make panel invisible)
@@ -37,16 +41,21 @@ function panel:GSSetupInvisibleScroll()
 end
 -- FUNCTION (Draw text panel)
 function panel:GSDrawTextPanel(m_color, soft, t_color, text, font, alig)
-    function self:Paint(w,h)
-        draw.RoundedBox(soft, 0,0,w, h, m_color)
+
+	self.TextPanelColor = m_color
+	self.TextPanelSoft = soft
+
+	function self:Paint(w,h)
+		if self.Invisible then
+			draw.RoundedBox(soft, 0,0,w, h, Color(0,0,0,0))
+		else
+			draw.RoundedBox(soft, 0,0,w, h, self.TextPanelColor)
+		end
     end
 
     if alig == nil then
         alig = 5
     end
-
-	self.TextPanelColor = m_color
-	self.TextPanelSoft = soft
 
     local title = vgui.Create( "DLabel", self )
     title:SetText( text )
@@ -136,4 +145,36 @@ function panel:GSSetupHoverSound(sound)
   self.OnCursorEntered = function()
     LocalPlayer():EmitSound(sound)
   end
+end
+
+/*******************************************
+
+	* Panel Hover
+	* Arguments:
+	- h_color -> Panel hover color
+	- h_Tcolor -> Text hover color
+
+********************************************/
+function panel:LastTime_SetupHover(h_color, h_Tcolor)
+	local text_panel = self:GSGetTextPanelText()
+	if !text_panel then return end
+	local text_panel_color = text_panel:GetTextColor()
+	-- Hover
+	self.Think = function()
+		if self:IsHovered() then
+			-- Panel color
+			function self:Paint(w,h)
+		        draw.RoundedBox(self.TextPanelSoft, 0, 0, w, h, h_color)
+		    end
+			-- Text color
+			text_panel:SetTextColor(h_Tcolor)
+		else
+			-- Panel color
+			function self:Paint(w,h)
+		        draw.RoundedBox(self.TextPanelSoft, 0, 0, w, h, self.TextPanelColor)
+		    end
+			-- Text color
+			text_panel:SetTextColor(text_panel_color)
+		end
+	end
 end
